@@ -1,37 +1,44 @@
 // The code below is a stub. Just enough to satisfy the compiler.
 // In order to pass the tests you can add-to or change any of this code.
 
+use std::ops::Div;
+
 #[derive(Debug)]
-pub struct Duration;
+pub struct Duration(u64);
 
 impl From<u64> for Duration {
     fn from(s: u64) -> Self {
-        unimplemented!("s, measured in seconds: {s}")
+        Self(s)
     }
 }
 
 pub trait Planet {
+    const EARTH_YEAR_IN_SEC: f64 = 31557600_f64;
+    const EARTH_YEAR_RATIO: f64 = 1_f64;
+
     fn years_during(d: &Duration) -> f64 {
-        unimplemented!(
-            "convert a duration ({d:?}) to the number of years on this planet for that duration"
-        );
+        (d.0 as f64).div(Self::EARTH_YEAR_IN_SEC).div(Self::EARTH_YEAR_RATIO)
     }
 }
 
-pub struct Mercury;
-pub struct Venus;
-pub struct Earth;
-pub struct Mars;
-pub struct Jupiter;
-pub struct Saturn;
-pub struct Uranus;
-pub struct Neptune;
+#[macro_export]
+macro_rules! make_planet {
+    ($st: ident($op: expr)) => {
 
-impl Planet for Mercury {}
-impl Planet for Venus {}
-impl Planet for Earth {}
-impl Planet for Mars {}
-impl Planet for Jupiter {}
-impl Planet for Saturn {}
-impl Planet for Uranus {}
-impl Planet for Neptune {}
+        // Define struct
+        pub struct $st;
+
+        impl Planet for $st {
+            const EARTH_YEAR_RATIO: f64 = $op;
+        }
+    };
+}
+
+make_planet!(Mercury(0.2408467_f64));
+make_planet!(Earth(1_f64));
+make_planet!(Venus(0.61519726_f64));
+make_planet!(Mars(1.8808158_f64));
+make_planet!(Jupiter(11.862615_f64));
+make_planet!(Saturn(29.447498_f64));
+make_planet!(Uranus(84.016846_f64));
+make_planet!(Neptune(164.79132_f64));

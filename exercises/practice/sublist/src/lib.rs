@@ -7,39 +7,22 @@ pub enum Comparison {
 }
 
 pub fn sublist<T: PartialEq + Copy>(first_list: &[T], second_list: &[T]) -> Comparison {
-    // Equal
-    if first_list == second_list {
-        return Comparison::Equal;
+    let find_sublist = |first: &[T], second: &[T]| {
+      first.windows(second.len()).any(| item| item == second)
+    };
+
+    match (first_list.len(), second_list.len()) {
+        (len1, len2) if len1 == len2 && first_list == second_list => Comparison::Equal,
+        (0, _) => Comparison::Sublist,
+        (_, 0) => Comparison::Superlist,
+        (len1, len2) if len1 > len2 => match find_sublist(first_list, second_list) {
+            true => Comparison::Superlist,
+            false => Comparison::Unequal,
+        },
+        (len1, len2) if len2 > len1 => match find_sublist(second_list, first_list) {
+            true => Comparison::Sublist,
+            false => Comparison::Unequal,
+        },
+        (_, _) => Comparison::Unequal,
     }
-
-    let mut result = Comparison::Unequal;
-    if first_list.len() > second_list.len() {
-        // empty list is a superlist
-        if second_list.is_empty() {
-            return Comparison::Superlist;
-        }
-
-        first_list.iter().enumerate().for_each(|(pos, &x)| {
-            if x == second_list[0] && pos + second_list.len() <= first_list.len() {
-                if &first_list[pos..pos + second_list.len()] == second_list {
-                    result = Comparison::Superlist;
-                }
-            }
-        });
-    } else {
-        // empty list is a sublist
-        if first_list.is_empty() {
-            return Comparison::Sublist;
-        }
-
-        second_list.iter().enumerate().for_each(|(pos, &x)| {
-            if x == first_list[0] && pos + first_list.len() <= second_list.len() {
-                if &second_list[pos..pos + first_list.len()] == first_list {
-                    result = Comparison::Sublist;
-                }
-            }
-        });
-    }
-
-    result
 }
